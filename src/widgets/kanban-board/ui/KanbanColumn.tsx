@@ -5,10 +5,10 @@ import { Task, TaskStatus } from "@/entities/task"
 import { KanbanCard } from "./KanbanCard"
 
 const COLUMN_TITLES: Record<TaskStatus, string> = {
-  BACKLOG: "Backlog",
-  IN_PROGRESS: "In Progress",
-  REVIEW: "Review",
-  DONE: "Done",
+  BACKLOG: "Новые",
+  IN_PROGRESS: "В работе",
+  REVIEW: "Ревью",
+  DONE: "Готово",
 }
 
 const STATUS_IDS: Record<TaskStatus, string> = {

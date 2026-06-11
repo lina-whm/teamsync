@@ -16,8 +16,13 @@ export function SprintAnalytics() {
 
   useEffect(() => {
     getSprintsQuery.start()
-    getTasksQuery.start({ sprintId: "", filters: { status: "all", assigneeId: null, priority: "all", search: "" } })
   }, [])
+
+  useEffect(() => {
+    if (activeSprint?.id) {
+      getTasksQuery.start({ sprintId: activeSprint.id, filters: { status: "all", assigneeId: null, priority: "all", search: "" } })
+    }
+  }, [activeSprint?.id])
 
   const taskList: Task[] = tasks ?? []
 
@@ -68,10 +73,10 @@ export function SprintAnalytics() {
       </h1>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6">
         <MetricCard label="Всего задач" value={sprintMetrics.total} />
-        <MetricCard label="Done" value={sprintMetrics.done} color="text-green-600" />
-        <MetricCard label="In Progress" value={sprintMetrics.inProgress} color="text-blue-600" />
-        <MetricCard label="Review" value={sprintMetrics.review} color="text-yellow-600" />
-        <MetricCard label="Backlog" value={sprintMetrics.backlog} color="text-gray-600" />
+        <MetricCard label="Готово" value={sprintMetrics.done} color="text-green-600" />
+        <MetricCard label="В работе" value={sprintMetrics.inProgress} color="text-blue-600" />
+        <MetricCard label="Ревью" value={sprintMetrics.review} color="text-yellow-600" />
+        <MetricCard label="Новые" value={sprintMetrics.backlog} color="text-gray-600" />
         <MetricCard
           label="Готовность"
           value={`${sprintMetrics.completionRate}%`}

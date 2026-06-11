@@ -12,11 +12,13 @@ import { EditTaskModal, taskEditOpened } from "@/features/edit-task"
 import { TaskDetailPanel } from "@/widgets/task-detail"
 import { KanbanColumn } from "./KanbanColumn"
 import { getTasksQuery, Task, TaskStatus } from "@/entities/task"
+import { $activeSprint, getSprintsQuery } from "@/entities/sprint"
 
 const STATUSES: TaskStatus[] = ["BACKLOG", "IN_PROGRESS", "REVIEW", "DONE"]
 
 export function KanbanBoard() {
   const filters = useUnit($filters)
+  const activeSprint = useUnit($activeSprint)
   const tasksData = useUnit(getTasksQuery.$data)
   const tasksPending = useUnit(getTasksQuery.$pending)
   const { handleDragEnd } = useDragDropTask()
@@ -26,8 +28,14 @@ export function KanbanBoard() {
   const editTask = useUnit(taskEditOpened)
 
   useEffect(() => {
-    getTasksQuery.start({ sprintId: "", filters })
-  }, [filters])
+    getSprintsQuery.start()
+  }, [])
+
+  useEffect(() => {
+    if (activeSprint?.id) {
+      getTasksQuery.start({ sprintId: activeSprint.id, filters })
+    }
+  }, [filters, activeSprint?.id])
 
   const tasks: Task[] = tasksData ?? []
 
@@ -69,7 +77,7 @@ export function KanbanBoard() {
         </button>
       </div>
       <TaskFilters />
-      {tasksPending ? (
+      {tasksPending || !activeSprint ? (
         <div className="flex items-center justify-center py-20">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
         </div>

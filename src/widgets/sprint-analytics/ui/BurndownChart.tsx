@@ -78,7 +78,7 @@ export function BurndownChart({ sprint, tasks }: BurndownChartProps) {
 
   return (
     <div className="rounded-lg border bg-white p-4">
-      <h3 className="mb-4 text-sm font-semibold text-gray-700">Burndown Chart</h3>
+      <h3 className="mb-4 text-sm font-semibold text-gray-700">График сгорания</h3>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />

@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { useUnit } from "effector-react"
 import { Loader2 } from "lucide-react"
 import { loginFormSubmitted, loginFx } from "@/features/auth/model/auth.model"
@@ -16,6 +17,7 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>
 
 export function LoginForm() {
+  const router = useRouter()
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const submit = useUnit(loginFormSubmitted)
@@ -36,6 +38,8 @@ export function LoginForm() {
       const result = await loginFx(data)
       if (!result.ok) {
         setError(result.error)
+      } else {
+        router.push("/board")
       }
     } catch {
       setError("Произошла ошибка при входе")

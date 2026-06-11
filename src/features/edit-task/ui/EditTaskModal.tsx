@@ -97,10 +97,10 @@ export function EditTaskModal() {
                 {...register("status")}
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
-                <option value="BACKLOG">Backlog</option>
-                <option value="IN_PROGRESS">In Progress</option>
-                <option value="REVIEW">Review</option>
-                <option value="DONE">Done</option>
+                <option value="BACKLOG">Новые</option>
+                <option value="IN_PROGRESS">В работе</option>
+                <option value="REVIEW">Ревью</option>
+                <option value="DONE">Готово</option>
               </select>
             </div>
             <div>

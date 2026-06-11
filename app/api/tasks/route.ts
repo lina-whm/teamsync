@@ -68,7 +68,8 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const { sprintId, ...data } = parsed.data
+  const { sprintId: rawSprintId, ...data } = parsed.data
+  const sprintId = rawSprintId || null
 
   const maxOrder = sprintId
     ? await db.task.aggregate({
@@ -83,7 +84,7 @@ export async function POST(req: NextRequest) {
     data: {
       ...data,
       order,
-      sprintId: sprintId ?? null,
+      sprintId,
       creatorId: session.user.id,
     },
     include: {

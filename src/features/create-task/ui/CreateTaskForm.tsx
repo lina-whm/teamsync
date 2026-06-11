@@ -34,7 +34,10 @@ export function CreateTaskForm() {
   })
 
   const onSubmit = (data: Record<string, unknown>) => {
-    submit(data as Parameters<typeof submit>[0])
+    const cleaned = { ...data }
+    if (!cleaned.sprintId) delete cleaned.sprintId
+    if (!cleaned.assigneeId) delete cleaned.assigneeId
+    submit(cleaned as Parameters<typeof submit>[0])
     reset()
   }
 

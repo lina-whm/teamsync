@@ -40,7 +40,7 @@ export function VelocityChart({ sprints, tasksBySprint }: VelocityChartProps) {
 
   return (
     <div className="rounded-lg border bg-white p-4">
-      <h3 className="mb-4 text-sm font-semibold text-gray-700">Velocity</h3>
+      <h3 className="mb-4 text-sm font-semibold text-gray-700">Скорость команды</h3>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
