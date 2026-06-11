@@ -1,0 +1,16 @@
+{
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["@entities/*/*", "@features/*/*", "@widgets/*/*"],
+            "message": "Импортируй только из публичного API слоя (index.ts)."
+          }
+        ]
+      }
+    ]
+  }
+}
