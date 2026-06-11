@@ -11,20 +11,16 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = req.nextUrl
   const sprintId = searchParams.get("sprintId")
-
-  if (!sprintId) {
-    return NextResponse.json(
-      { error: "sprintId is required" },
-      { status: 400 },
-    )
-  }
-
   const status = searchParams.get("status")
   const assigneeId = searchParams.get("assigneeId")
   const priority = searchParams.get("priority")
   const search = searchParams.get("search")
 
-  const where: Record<string, unknown> = { sprintId }
+  const where: Record<string, unknown> = {}
+
+  if (sprintId) {
+    where.sprintId = sprintId
+  }
 
   if (status && status !== "all") {
     where.status = status

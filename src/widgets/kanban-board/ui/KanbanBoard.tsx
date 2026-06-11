@@ -16,6 +16,21 @@ import { $activeSprint, getSprintsQuery } from "@/entities/sprint"
 
 const STATUSES: TaskStatus[] = ["BACKLOG", "IN_PROGRESS", "REVIEW", "DONE"]
 
+function BoardSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {STATUSES.map((s) => (
+        <div key={s} className="min-h-[400px] rounded-lg bg-gray-100 p-3 animate-pulse">
+          <div className="mb-3 h-5 w-20 rounded bg-gray-200" />
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="mb-2 h-24 rounded-md bg-white/60" />
+          ))}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export function KanbanBoard() {
   const filters = useUnit($filters)
   const activeSprint = useUnit($activeSprint)
@@ -29,13 +44,14 @@ export function KanbanBoard() {
 
   useEffect(() => {
     getSprintsQuery.start()
+    getTasksQuery.start({ sprintId: "", filters })
   }, [])
 
   useEffect(() => {
     if (activeSprint?.id) {
       getTasksQuery.start({ sprintId: activeSprint.id, filters })
     }
-  }, [filters, activeSprint?.id])
+  }, [activeSprint?.id])
 
   const tasks: Task[] = tasksData ?? []
 
@@ -77,10 +93,8 @@ export function KanbanBoard() {
         </button>
       </div>
       <TaskFilters />
-      {tasksPending || !activeSprint ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
-        </div>
+      {tasksPending && !tasks.length ? (
+        <BoardSkeleton />
       ) : (
         <DndContext onDragEnd={onDragEnd}>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
