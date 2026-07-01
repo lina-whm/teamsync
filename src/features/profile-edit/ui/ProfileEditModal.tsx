@@ -12,6 +12,16 @@ import {
 } from "../model/profile-edit.model"
 import { $currentUser } from "@/entities/user"
 
+interface FormFields {
+  firstName: string
+  lastName: string
+  position: string
+  department: string
+  city: string
+  workEmail: string
+  workPhone: string
+}
+
 export function ProfileEditModal() {
   const open = useUnit($profileDialogOpen)
   const pending = useUnit($savePending)
@@ -28,11 +38,19 @@ export function ProfileEditModal() {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm()
+  } = useForm<FormFields>()
 
   useEffect(() => {
     if (currentUser) {
-      reset({ name: currentUser.name })
+      reset({
+        firstName: currentUser.firstName ?? currentUser.name,
+        lastName: currentUser.lastName ?? "",
+        position: currentUser.position ?? "",
+        department: currentUser.department ?? "",
+        city: currentUser.city ?? "",
+        workEmail: currentUser.workEmail ?? "",
+        workPhone: currentUser.workPhone ?? "",
+      })
       setPreview(null)
       setRemoveAvatar(false)
       if (fileRef.current) fileRef.current.value = ""
@@ -50,9 +68,9 @@ export function ProfileEditModal() {
 
   if (!open) return null
 
-  const onSubmit = async (data: Record<string, unknown>) => {
+  const onSubmit = async (data: FormFields) => {
     const file = fileRef.current?.files?.[0]
-    let avatarUrl: string | null
+    let avatar: string | null
 
     if (file) {
       setUploading(true)
@@ -63,28 +81,42 @@ export function ProfileEditModal() {
           method: "POST",
           body: formData,
         })
-        avatarUrl = res.ok ? (await res.json()).url : null
+        avatar = res.ok ? (await res.json()).url : null
       } catch {
-        avatarUrl = null
+        avatar = null
       }
       setUploading(false)
     } else {
-      avatarUrl = null
+      avatar = null
     }
 
-    if (!avatarUrl && !removeAvatar) {
-      avatarUrl = currentUser?.avatar ?? null
+    if (!avatar && !removeAvatar) {
+      avatar = currentUser?.avatar ?? null
     }
 
-    submit({ name: data.name as string, avatarUrl })
+    const toNull = (v: string) => (v.trim() === "" ? null : v.trim())
+
+    submit({
+      firstName: data.firstName.trim(),
+      lastName: toNull(data.lastName),
+      position: toNull(data.position),
+      department: toNull(data.department),
+      city: toNull(data.city),
+      workEmail: toNull(data.workEmail),
+      workPhone: toNull(data.workPhone),
+      avatar,
+    })
   }
 
   const displaySrc = preview ?? (removeAvatar ? null : currentUser?.avatar) ?? null
 
+  const inputClass =
+    "mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-black/50" onClick={() => close()} />
-      <div className="relative z-10 w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+      <div className="relative z-10 w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900">Редактировать профиль</h2>
           <button
@@ -94,15 +126,16 @@ export function ProfileEditModal() {
             <X className="h-5 w-5" />
           </button>
         </div>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="flex flex-col items-center gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Avatar */}
+          <div className="flex flex-col items-center gap-3">
             <div className="relative">
               {displaySrc ? (
                 <div className="relative">
                   <img
                     src={displaySrc}
                     alt=""
-                    className="h-24 w-24 rounded-full object-cover ring-4 ring-gray-100"
+                    className="h-20 w-20 rounded-full object-cover ring-4 ring-gray-100"
                   />
                   <button
                     type="button"
@@ -111,19 +144,19 @@ export function ProfileEditModal() {
                       setRemoveAvatar(true)
                       if (fileRef.current) fileRef.current.value = ""
                     }}
-                    className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow hover:bg-red-600"
+                    className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow hover:bg-red-600"
                     title="Удалить аватар"
                   >
                     <Trash2 className="h-3 w-3" />
                   </button>
                 </div>
               ) : (
-                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gray-100 ring-4 ring-gray-50">
-                  <Upload className="h-8 w-8 text-gray-400" />
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 ring-4 ring-gray-50">
+                  <Upload className="h-7 w-7 text-gray-400" />
                 </div>
               )}
             </div>
-            <label className="cursor-pointer rounded-md bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100 transition-colors">
+            <label className="cursor-pointer rounded-md bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors">
               {displaySrc ? "Изменить фото" : "Загрузить фото"}
               <input
                 ref={fileRef}
@@ -140,23 +173,58 @@ export function ProfileEditModal() {
               />
             </label>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700" htmlFor="pp-name">
-              Имя
-            </label>
-            <input
-              id="pp-name"
-              {...register("name", { required: "Имя обязательно" })}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
-            {errors.name && (
-              <p className="mt-1 text-xs text-red-600">{errors.name.message as string}</p>
-            )}
+
+          {/* Name row */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-700" htmlFor="pp-firstName">Имя</label>
+              <input
+                id="pp-firstName"
+                {...register("firstName", { required: "Имя обязательно" })}
+                className={inputClass}
+              />
+              {errors.firstName && <p className="mt-0.5 text-xs text-red-600">{errors.firstName.message}</p>}
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700" htmlFor="pp-lastName">Фамилия</label>
+              <input id="pp-lastName" {...register("lastName")} className={inputClass} />
+            </div>
           </div>
+
+          {/* Position & Department */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-700" htmlFor="pp-position">Должность</label>
+              <input id="pp-position" {...register("position")} className={inputClass} placeholder="Frontend Developer" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700" htmlFor="pp-department">Отдел</label>
+              <input id="pp-department" {...register("department")} className={inputClass} placeholder="Engineering" />
+            </div>
+          </div>
+
+          {/* City */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700" htmlFor="pp-city">Город</label>
+            <input id="pp-city" {...register("city")} className={inputClass} placeholder="Moscow" />
+          </div>
+
+          {/* Work contacts */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-700" htmlFor="pp-workEmail">Рабочая почта</label>
+              <input id="pp-workEmail" {...register("workEmail")} className={inputClass} placeholder="user@company.ru" type="email" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700" htmlFor="pp-workPhone">Рабочий телефон</label>
+              <input id="pp-workPhone" {...register("workPhone")} className={inputClass} placeholder="+7-999-111-22-33" type="tel" />
+            </div>
+          </div>
+
           <button
             type="submit"
             disabled={pending || uploading}
-            className="flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+            className="mt-2 flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
           >
             {(pending || uploading) && <Loader2 className="h-4 w-4 animate-spin" />}
             {uploading ? "Загрузка..." : pending ? "Сохранение..." : "Сохранить"}

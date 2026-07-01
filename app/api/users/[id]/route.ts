@@ -3,9 +3,21 @@ import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { z } from "zod"
 
+const selectFields = {
+  id: true, email: true, name: true, firstName: true, lastName: true,
+  avatar: true, position: true, department: true, city: true,
+  workEmail: true, workPhone: true, role: true,
+} as const
+
 const UpdateUserSchema = z.object({
-  name: z.string().min(1, "Name is required").optional(),
+  firstName: z.string().min(1, "Имя обязательно").optional(),
+  lastName: z.string().nullable().optional(),
   avatar: z.string().nullable().optional(),
+  position: z.string().nullable().optional(),
+  department: z.string().nullable().optional(),
+  city: z.string().nullable().optional(),
+  workEmail: z.string().nullable().optional(),
+  workPhone: z.string().nullable().optional(),
 })
 
 export async function GET(
@@ -21,7 +33,7 @@ export async function GET(
 
   const user = await db.user.findUnique({
     where: { id },
-    select: { id: true, email: true, name: true, avatar: true, role: true },
+    select: selectFields,
   })
 
   if (!user) {
@@ -52,10 +64,17 @@ export async function PATCH(
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
 
+  const data: Record<string, unknown> = { ...parsed.data }
+  if (data.firstName !== undefined) {
+    data.name = data.lastName
+      ? `${data.firstName} ${data.lastName}`
+      : data.firstName
+  }
+
   const user = await db.user.update({
     where: { id },
-    data: parsed.data,
-    select: { id: true, email: true, name: true, avatar: true, role: true },
+    data,
+    select: selectFields,
   })
 
   return NextResponse.json(user)

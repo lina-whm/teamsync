@@ -11,8 +11,15 @@ model User {
   id             String    @id @default(cuid())
   email          String    @unique
   name           String
+  firstName      String?
+  lastName       String?
   password       String
   avatar         String?
+  position       String?
+  department     String?
+  city           String?
+  workEmail      String?
+  workPhone      String?
   emailVerified  DateTime?
   image          String?
   role           String    @default("MEMBER")

@@ -6,17 +6,28 @@ import { $currentUser, loadSessionFx } from "@/entities/user"
 
 export const profileEditOpened = createEvent()
 export const profileEditClosed = createEvent()
-export const profileFormSubmitted = createEvent<{ name: string; avatarUrl: string | null }>()
+export interface ProfileFormData {
+  firstName: string
+  lastName: string | null
+  position: string | null
+  department: string | null
+  city: string | null
+  workEmail: string | null
+  workPhone: string | null
+  avatar: string | null
+}
+
+export const profileFormSubmitted = createEvent<ProfileFormData>()
 
 export const $profileDialogOpen = createStore(false)
   .on(profileEditOpened, () => true)
   .reset(profileEditClosed)
 
 export const saveProfileFx = createEffect(
-  async ({ id, name, avatar }: { id: string; name: string; avatar: string | null }) => {
+  async ({ id, ...data }: { id: string } & ProfileFormData) => {
     return apiClient<User>(`/api/users/${id}`, {
       method: "PATCH",
-      body: JSON.stringify({ name, avatar }),
+      body: JSON.stringify(data),
     })
   },
 )
@@ -30,7 +41,7 @@ sample({
   source: $currentUser,
   fn: (user, formData) => {
     if (!user) throw new Error("Not authenticated")
-    return { id: user.id, name: formData.name, avatar: formData.avatarUrl }
+    return { id: user.id, ...formData }
   },
   target: saveProfileFx,
 })

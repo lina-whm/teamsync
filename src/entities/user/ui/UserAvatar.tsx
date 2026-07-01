@@ -10,7 +10,7 @@ const sizeClasses = {
 }
 
 interface UserAvatarProps {
-  user?: Pick<User, "name" | "avatar"> | null
+  user?: Pick<User, "name" | "firstName" | "lastName" | "avatar"> | null
   size?: "sm" | "md" | "lg"
 }
 
