@@ -88,13 +88,6 @@ export async function DELETE(
     return NextResponse.json({ error: "Task not found" }, { status: 404 })
   }
 
-  const isCreator = task.creatorId === session.user.id
-  const isAdmin = session.user.role === "ADMIN"
-
-  if (!isCreator && !isAdmin) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-  }
-
   await db.task.delete({ where: { id } })
 
   return NextResponse.json({ success: true })

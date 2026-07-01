@@ -41,7 +41,7 @@ export const $filters = createStore<TaskFilters>({
   status: "all",
   priority: "all",
   assigneeId: null,
-})
+}).reset(filtersReset)
 
 sample({
   clock: [$debouncedSearch, $statusFilter, $priorityFilter, $assigneeFilter],

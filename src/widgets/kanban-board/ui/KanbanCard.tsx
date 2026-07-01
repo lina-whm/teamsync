@@ -77,6 +77,8 @@ export function KanbanCard({ task, onClick, onEdit, onDelete }: KanbanCardProps)
       </div>
       <div className="absolute right-1 top-1 hidden gap-0.5 group-hover:flex">
         <button
+          type="button"
+          onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => { e.stopPropagation(); onEdit() }}
           className="rounded p-1 text-gray-400 hover:bg-blue-100 hover:text-blue-600"
           title="Редактировать"
@@ -84,6 +86,8 @@ export function KanbanCard({ task, onClick, onEdit, onDelete }: KanbanCardProps)
           <Pencil className="h-3.5 w-3.5" />
         </button>
         <button
+          type="button"
+          onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => { e.stopPropagation(); onDelete() }}
           className="rounded p-1 text-gray-400 hover:bg-red-100 hover:text-red-600"
           title="Удалить"
