@@ -58,14 +58,21 @@ export function EditTaskModal() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black/50" onClick={() => close()} />
-      <div className="relative z-10 w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+        style={{ animation: "fadeIn 0.15s ease-out" }}
+        onClick={() => close()}
+      />
+      <div
+        className="relative z-10 w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl"
+        style={{ animation: "scaleIn 0.2s ease-out" }}
+      >
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Редактировать задачу</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Редактировать задачу</h2>
           <button
             onClick={() => close()}
-            className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
@@ -78,7 +85,7 @@ export function EditTaskModal() {
             <input
               id="et-title"
               {...register("title")}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="input-modern mt-1"
             />
             {errors.title && (
               <p className="mt-1 text-xs text-red-600">{errors.title.message}</p>
@@ -92,7 +99,7 @@ export function EditTaskModal() {
               id="et-description"
               rows={3}
               {...register("description")}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="input-modern mt-1"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -103,7 +110,7 @@ export function EditTaskModal() {
               <select
                 id="et-status"
                 {...register("status")}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="input-modern mt-1"
               >
                 <option value="BACKLOG">Новые</option>
                 <option value="IN_PROGRESS">В работе</option>
@@ -118,7 +125,7 @@ export function EditTaskModal() {
               <select
                 id="et-priority"
                 {...register("priority")}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="input-modern mt-1"
               >
                 <option value="LOW">Низкий</option>
                 <option value="MEDIUM">Средний</option>
@@ -136,7 +143,7 @@ export function EditTaskModal() {
               type="number"
               min={1}
               {...register("storyPoints", { valueAsNumber: true })}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="input-modern mt-1"
             />
           </div>
           <div>
@@ -146,7 +153,7 @@ export function EditTaskModal() {
             <select
               id="et-assignee"
               {...register("assigneeId")}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="input-modern mt-1"
             >
               <option value="">Не назначен</option>
               {users?.map((u: { id: string; name: string }) => (
@@ -159,9 +166,9 @@ export function EditTaskModal() {
           <button
             type="submit"
             disabled={pending}
-            className="flex w-full items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="btn-primary w-full"
           >
-            {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {pending && <Loader2 className="h-4 w-4 animate-spin" />}
             {pending ? "Сохранение..." : "Сохранить"}
           </button>
         </form>

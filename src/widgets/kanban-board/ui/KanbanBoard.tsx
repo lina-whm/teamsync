@@ -116,17 +116,18 @@ export function KanbanBoard() {
         <BoardSkeleton />
       ) : (
         <DndContext onDragEnd={onDragEnd}>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0">
             {STATUSES.map((status) => (
-              <KanbanColumn
-                key={status}
-                status={status}
-                tasks={groupedTasks[status]}
-                onTaskClick={handleTaskClick}
-                onTaskEdit={handleCardEdit}
-                onTaskDelete={handleCardDelete}
-                onViewProfile={handleViewProfile}
-              />
+              <div key={status} className="min-w-[280px] snap-start lg:min-w-0">
+                <KanbanColumn
+                  status={status}
+                  tasks={groupedTasks[status]}
+                  onTaskClick={handleTaskClick}
+                  onTaskEdit={handleCardEdit}
+                  onTaskDelete={handleCardDelete}
+                  onViewProfile={handleViewProfile}
+                />
+              </div>
             ))}
           </div>
         </DndContext>

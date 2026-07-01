@@ -50,6 +50,7 @@ export function KanbanCard({ task, onClick, onEdit, onDelete, onViewProfile }: K
       ref={setNodeRef}
       {...listeners}
       {...attributes}
+      data-testid="task-card"
       style={style}
       className={`group relative rounded-md border border-l-4 bg-white shadow-sm ${
         STATUS_COLORS[task.status]

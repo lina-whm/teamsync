@@ -35,6 +35,7 @@ export function KanbanColumn({ status, tasks, onTaskClick, onTaskEdit, onTaskDel
   return (
     <div
       ref={setNodeRef}
+      data-testid={`column-${status}`}
       className={`flex min-h-[400px] w-full flex-col rounded-lg bg-gray-100 p-3 ${
         isOver ? "ring-2 ring-blue-400" : ""
       }`}

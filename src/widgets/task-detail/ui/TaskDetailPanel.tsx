@@ -45,13 +45,20 @@ export function TaskDetailPanel({ task, open, onClose, onEdit }: TaskDetailPanel
 
   return (
     <div className="fixed inset-0 z-40 flex justify-end">
-      <div className="fixed inset-0 bg-black/30" onClick={onClose} />
-      <div className="relative z-50 w-full max-w-md bg-white p-6 shadow-xl">
+      <div
+        className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+        style={{ animation: "fadeIn 0.15s ease-out" }}
+        onClick={onClose}
+      />
+      <div
+        className="relative z-50 w-full max-w-md bg-white p-6 shadow-2xl"
+        style={{ animation: "slideIn 0.2s ease-out" }}
+      >
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900">{task.title}</h2>
           <button
             onClick={onClose}
-            className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
@@ -93,17 +100,14 @@ export function TaskDetailPanel({ task, open, onClose, onEdit }: TaskDetailPanel
           </div>
         </div>
         <div className="mt-6 flex gap-3 border-t pt-4">
-          <button
-            onClick={onEdit}
-            className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-          >
+          <button onClick={onEdit} className="btn-primary">
             <Pencil className="h-4 w-4" />
             Редактировать
           </button>
           <button
             onClick={() => deleteMutation.mutate()}
             disabled={deleteMutation.isPending}
-            className="flex items-center gap-2 rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="btn-destructive"
           >
             {deleteMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />

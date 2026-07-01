@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   images: {
     domains: ["avatars.githubusercontent.com"],
   },
-  serverExternalPackages: ["bcryptjs"],
+  serverExternalPackages: ["bcryptjs", "@libsql/client"],
 }
 
 export default nextConfig

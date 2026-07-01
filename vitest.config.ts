@@ -5,11 +5,15 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
+    include: ["src/tests/**/*.test.{ts,tsx}"],
     setupFiles: "./src/tests/setup.ts",
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "lcov"],
     },
+  },
+  esbuild: {
+    jsx: "automatic",
   },
   resolve: {
     alias: {

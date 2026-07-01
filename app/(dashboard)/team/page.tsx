@@ -33,7 +33,7 @@ export default function TeamPage() {
       .slice(0, 2)
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <h1 className="text-xl font-bold text-gray-900">Команда</h1>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {(users ?? []).map((user: User) => (
@@ -41,7 +41,7 @@ export default function TeamPage() {
             key={user.id}
             type="button"
             onClick={() => setSelectedUser(user)}
-            className="rounded-lg border bg-white p-4 shadow-sm text-left hover:shadow-md transition-shadow"
+            className="card-modern p-4 text-left transition-all hover:-translate-y-0.5"
           >
             <div className="flex items-center gap-3">
               {user.avatar ? (
