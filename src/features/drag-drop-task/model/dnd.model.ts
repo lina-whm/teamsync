@@ -1,12 +1,13 @@
 "use client"
 
 import { useCallback } from "react"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query"
+import { useUnit } from "effector-react"
 import { apiClient } from "@/shared/api/base"
-import { TaskStatus } from "@/entities/task"
+import { TaskStatus, refetchTasks } from "@/entities/task"
 
 export function useDragDropTask() {
-  const queryClient = useQueryClient()
+  const refetch = useUnit(refetchTasks)
 
   const mutation = useMutation({
     mutationFn: async ({
@@ -22,7 +23,7 @@ export function useDragDropTask() {
       })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] })
+      refetch()
     },
   })
 

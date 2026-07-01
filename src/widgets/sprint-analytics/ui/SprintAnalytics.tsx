@@ -6,6 +6,7 @@ import { $activeSprint, getSprintsQuery } from "@/entities/sprint"
 import { getTasksQuery, Task } from "@/entities/task"
 import { BurndownChart } from "./BurndownChart"
 import { VelocityChart } from "./VelocityChart"
+import { analyticsMounted } from "../model/analytics.model"
 
 export function SprintAnalytics() {
   const activeSprint = useUnit($activeSprint)
@@ -14,15 +15,11 @@ export function SprintAnalytics() {
   const tasks = useUnit(getTasksQuery.$data)
   const tasksPending = useUnit(getTasksQuery.$pending)
 
-  useEffect(() => {
-    getSprintsQuery.start()
-  }, [])
+  const onAnalyticsMounted = useUnit(analyticsMounted)
 
   useEffect(() => {
-    if (activeSprint?.id) {
-      getTasksQuery.start({ sprintId: activeSprint.id, filters: { status: "all", assigneeId: null, priority: "all", search: "" } })
-    }
-  }, [activeSprint?.id])
+    onAnalyticsMounted()
+  }, [])
 
   const taskList: Task[] = tasks ?? []
 

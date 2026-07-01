@@ -47,27 +47,31 @@ export function KanbanCard({ task, onClick }: KanbanCardProps) {
       {...listeners}
       {...attributes}
       style={style}
-      onClick={onClick}
-      className={`cursor-grab rounded-md border border-l-4 bg-white p-3 shadow-sm transition-shadow hover:shadow-md ${
+      className={`rounded-md border border-l-4 bg-white shadow-sm ${
         STATUS_COLORS[task.status]
       } ${isDragging ? "opacity-50 shadow-lg" : ""}`}
     >
-      <p className="mb-2 text-sm font-medium text-gray-900">{task.title}</p>
-      <div className="flex items-center gap-2">
-        <span
-          className={`inline-block rounded px-1.5 py-0.5 text-xs font-medium ${
-            PRIORITY_COLORS[task.priority]
-          }`}
-        >
-          {PRIORITY_LABELS[task.priority]}
-        </span>
-        {task.storyPoints && (
-          <span className="text-xs text-gray-500">{task.storyPoints} SP</span>
+      <div
+        onClick={onClick}
+        className="cursor-pointer p-3 transition-shadow hover:shadow-md"
+      >
+        <p className="mb-2 text-sm font-medium text-gray-900">{task.title}</p>
+        <div className="flex items-center gap-2">
+          <span
+            className={`inline-block rounded px-1.5 py-0.5 text-xs font-medium ${
+              PRIORITY_COLORS[task.priority]
+            }`}
+          >
+            {PRIORITY_LABELS[task.priority]}
+          </span>
+          {task.storyPoints && (
+            <span className="text-xs text-gray-500">{task.storyPoints} SP</span>
+          )}
+        </div>
+        {task.assignee && (
+          <p className="mt-1 text-xs text-gray-500">{task.assignee.name}</p>
         )}
       </div>
-      {task.assignee && (
-        <p className="mt-1 text-xs text-gray-500">{task.assignee.name}</p>
-      )}
     </div>
   )
 }

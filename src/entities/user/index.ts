@@ -1,7 +1,7 @@
 export type { User, Role } from "./model/user.types"
 export { UserSchema, Role as RoleEnum } from "./model/user.types"
 
-export { getUsersQuery } from "./api/user.api"
+export { getUsersFx, getUsersQuery } from "./api/user.api"
 
 export {
   $currentUser,

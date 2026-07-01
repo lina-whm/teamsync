@@ -29,14 +29,22 @@ export function CreateTaskForm() {
   } = useForm({
     resolver: zodResolver(CreateTaskSchema),
     defaultValues: {
+      title: "",
+      description: "",
+      priority: "MEDIUM",
+      storyPoints: 1,
+      assigneeId: "",
       sprintId: activeSprint?.id ?? "",
     },
   })
 
   const onSubmit = (data: Record<string, unknown>) => {
+    console.log("[CreateTaskForm] onSubmit data:", data)
     const cleaned = { ...data }
-    if (!cleaned.sprintId) delete cleaned.sprintId
+    if (activeSprint?.id) cleaned.sprintId = activeSprint.id
+    else delete cleaned.sprintId
     if (!cleaned.assigneeId) delete cleaned.assigneeId
+    console.log("[CreateTaskForm] cleaned data:", cleaned)
     submit(cleaned as Parameters<typeof submit>[0])
     reset()
   }
@@ -91,9 +99,15 @@ export function CreateTaskForm() {
             id="ct-storyPoints"
             type="number"
             min={1}
-            {...register("storyPoints", { valueAsNumber: true })}
+            {...register("storyPoints")}
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
+          {errors.storyPoints && (
+            <p className="mt-1 text-xs text-red-600">{String(errors.storyPoints.message)}</p>
+          )}
+          <p className="mt-0.5 text-xs text-gray-400">
+            Оценка сложности (1 = просто, 2, 3, 5, 8, 13 = сложно)
+          </p>
         </div>
       </div>
       <div>

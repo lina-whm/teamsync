@@ -18,11 +18,13 @@ export {
 } from "./model/task.types"
 
 export {
+  getTasksFx,
   getTasksQuery,
   getTaskByIdQuery,
   createTaskMutation,
   updateTaskMutation,
   deleteTaskMutation,
+  refetchTasks,
 } from "./api/task.api"
 
 export { $selectedTaskId, $taskDetailOpen, taskSelected, taskDetailClosed } from "./model/task.store"

@@ -1,6 +1,5 @@
 import { createEvent, createStore, sample } from "effector"
-import { createTaskMutation, CreateTaskDto } from "@/entities/task"
-import { invalidateTasksCacheFx } from "@/shared/api/invalidation"
+import { createTaskMutation, CreateTaskDto, refetchTasks } from "@/entities/task"
 
 export const createTaskFormSubmitted = createEvent<CreateTaskDto>()
 export const createTaskDialogOpened = createEvent()
@@ -18,5 +17,10 @@ sample({
 
 sample({
   clock: createTaskMutation.finished.success,
-  target: [invalidateTasksCacheFx, createTaskDialogClosed],
+  target: createTaskDialogClosed,
+})
+
+sample({
+  clock: createTaskMutation.finished.success,
+  target: refetchTasks,
 })

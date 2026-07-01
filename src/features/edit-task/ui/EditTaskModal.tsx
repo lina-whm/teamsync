@@ -13,6 +13,7 @@ import {
   editTaskFormSubmitted,
 } from "@/features/edit-task/model/edit-task.model"
 import { UpdateTaskSchema } from "@/entities/task"
+import { getUsersQuery } from "@/entities/user"
 
 export function EditTaskModal() {
   const task = useUnit($editingTask)
@@ -20,6 +21,11 @@ export function EditTaskModal() {
   const pending = useUnit($editTaskPending)
   const close = useUnit(editTaskDialogClosed)
   const submit = useUnit(editTaskFormSubmitted)
+  const users = useUnit(getUsersQuery.$data)
+
+  useEffect(() => {
+    getUsersQuery.start()
+  }, [])
 
   const {
     register,
@@ -46,7 +52,9 @@ export function EditTaskModal() {
   if (!open || !task) return null
 
   const onSubmit = (data: Record<string, unknown>) => {
-    submit({ id: task.id, ...data } as Parameters<typeof submit>[0])
+    const cleaned = { ...data }
+    if (!cleaned.assigneeId) delete cleaned.assigneeId
+    submit({ id: task.id, ...cleaned } as Parameters<typeof submit>[0])
   }
 
   return (
@@ -130,6 +138,23 @@ export function EditTaskModal() {
               {...register("storyPoints", { valueAsNumber: true })}
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700" htmlFor="et-assignee">
+              Исполнитель
+            </label>
+            <select
+              id="et-assignee"
+              {...register("assigneeId")}
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="">Не назначен</option>
+              {users?.map((u: { id: string; name: string }) => (
+                <option key={u.id} value={u.id}>
+                  {u.name}
+                </option>
+              ))}
+            </select>
           </div>
           <button
             type="submit"

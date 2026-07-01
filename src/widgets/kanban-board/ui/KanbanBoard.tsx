@@ -4,15 +4,14 @@ import { useState, useEffect } from "react"
 import { DndContext, DragEndEvent } from "@dnd-kit/core"
 import { useUnit } from "effector-react"
 import { useDragDropTask } from "@/features/drag-drop-task"
-import { $filters } from "@/features/filter-tasks"
-import { $createTaskDialogOpen, createTaskDialogOpened } from "@/features/create-task"
-import { TaskFilters } from "@/features/filter-tasks"
+import { createTaskDialogOpened } from "@/features/create-task"
 import { CreateTaskModal } from "@/features/create-task"
 import { EditTaskModal, taskEditOpened } from "@/features/edit-task"
 import { TaskDetailPanel } from "@/widgets/task-detail"
+import { TaskFilters } from "@/features/filter-tasks"
 import { KanbanColumn } from "./KanbanColumn"
 import { getTasksQuery, Task, TaskStatus } from "@/entities/task"
-import { $activeSprint, getSprintsQuery } from "@/entities/sprint"
+import { boardMounted } from "../model/board.model"
 
 const STATUSES: TaskStatus[] = ["BACKLOG", "IN_PROGRESS", "REVIEW", "DONE"]
 
@@ -32,10 +31,9 @@ function BoardSkeleton() {
 }
 
 export function KanbanBoard() {
-  const filters = useUnit($filters)
-  const activeSprint = useUnit($activeSprint)
   const tasksData = useUnit(getTasksQuery.$data)
   const tasksPending = useUnit(getTasksQuery.$pending)
+  const onBoardMounted = useUnit(boardMounted)
   const { handleDragEnd } = useDragDropTask()
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [detailOpen, setDetailOpen] = useState(false)
@@ -43,15 +41,8 @@ export function KanbanBoard() {
   const editTask = useUnit(taskEditOpened)
 
   useEffect(() => {
-    getSprintsQuery.start()
-    getTasksQuery.start({ sprintId: "", filters })
+    onBoardMounted()
   }, [])
-
-  useEffect(() => {
-    if (activeSprint?.id) {
-      getTasksQuery.start({ sprintId: activeSprint.id, filters })
-    }
-  }, [activeSprint?.id])
 
   const tasks: Task[] = tasksData ?? []
 

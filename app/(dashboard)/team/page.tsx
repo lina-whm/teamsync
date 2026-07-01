@@ -2,14 +2,15 @@
 
 import { useUnit } from "effector-react"
 import { useEffect } from "react"
-import { getUsersQuery } from "@/entities/user"
+import { getUsersFx, getUsersQuery } from "@/entities/user"
 
 export default function TeamPage() {
   const users = useUnit(getUsersQuery.$data)
   const pending = useUnit(getUsersQuery.$pending)
+  const loadUsers = useUnit(getUsersFx)
 
   useEffect(() => {
-    getUsersQuery.start()
+    loadUsers()
   }, [])
 
   if (pending) {

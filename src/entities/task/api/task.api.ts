@@ -1,5 +1,5 @@
 import { createQuery, createMutation } from "@farfetched/core"
-import { createEffect } from "effector"
+import { createEffect, createEvent, sample } from "effector"
 import { z } from "zod"
 import { apiClient } from "@/shared/api/base"
 import { createContract } from "@/shared/api/contract"
@@ -11,11 +11,12 @@ import {
   type UpdateTaskDto,
   type TaskFilters,
 } from "../model/task.types"
+import type { Task } from "../model/task.types"
 
 const singleTaskContract = createContract(TaskSchema)
 const tasksArrayContract = createContract(z.array(TaskSchema))
 
-const getTasksFx = createEffect(
+export const getTasksFx = createEffect(
   async (params: { sprintId: string; filters?: TaskFilters }) => {
     const searchParams = new URLSearchParams()
     searchParams.set("sprintId", params.sprintId)
@@ -55,11 +56,15 @@ export const getTaskByIdQuery = createQuery({
 
 export const createTaskMutation = createMutation({
   handler: async (params: CreateTaskDto) => {
+    console.log("[createTaskMutation] handler called with params:", params)
     const body = CreateTaskSchema.parse(params)
-    return apiClient<unknown>("/api/tasks", {
+    console.log("[createTaskMutation] parsed body:", body)
+    const result = await apiClient<unknown>("/api/tasks", {
       method: "POST",
       body: JSON.stringify(body),
     })
+    console.log("[createTaskMutation] API response:", result)
+    return result
   },
 })
 
@@ -80,3 +85,5 @@ export const deleteTaskMutation = createMutation({
     })
   },
 })
+
+export const refetchTasks = createEvent()

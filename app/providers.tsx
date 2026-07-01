@@ -6,7 +6,7 @@ import { Provider } from "effector-react"
 import { SessionProvider } from "next-auth/react"
 import { queryClient } from "@/shared/config/query-client"
 import { createIsomorphicScope } from "@/shared/lib/effector"
-import { loadSessionFx } from "@/shared/api/session"
+import { loadSessionFx } from "@/entities/user"
 
 const scope = createIsomorphicScope()
 
@@ -16,7 +16,7 @@ export function Providers({ children }: PropsWithChildren) {
   }, [])
 
   return (
-    <SessionProvider>
+    <SessionProvider refetchInterval={0}>
       <QueryClientProvider client={queryClient}>
         <Provider value={scope}>
           {children}

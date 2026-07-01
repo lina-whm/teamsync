@@ -7,6 +7,7 @@ import { useEffect } from "react"
 import { LayoutDashboard, BarChart3, Users, LogOut } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { $currentUser, $userInitials } from "@/entities/user"
+import { profileEditOpened, ProfileEditModal } from "@/features/profile-edit"
 import { $activeSprint, sprintChanged, getSprintsQuery } from "@/entities/sprint"
 
 const NAV_ITEMS = [
@@ -23,6 +24,7 @@ export function AppSidebar() {
   const changeSprint = useUnit(sprintChanged)
   const sprints = useUnit(getSprintsQuery.$data)
   const sprintsPending = useUnit(getSprintsQuery.$pending)
+  const openProfileEdit = useUnit(profileEditOpened)
 
   useEffect(() => {
     getSprintsQuery.start()
@@ -77,24 +79,30 @@ export function AppSidebar() {
       </nav>
       <div className="border-t px-4 py-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700">
-            {initials}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="truncate text-sm font-medium text-gray-900">
-              {currentUser?.name ?? "Пользователь"}
-            </p>
-            <p className="truncate text-xs text-gray-500">{currentUser?.email}</p>
-          </div>
+          <button
+            onClick={() => openProfileEdit()}
+            className="flex items-center gap-3 flex-1 min-w-0 rounded-md p-1 hover:bg-gray-50 transition-colors text-left"
+          >
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700">
+              {initials}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="truncate text-sm font-medium text-gray-900">
+                {currentUser?.name ?? "Пользователь"}
+              </p>
+              <p className="truncate text-xs text-gray-500">{currentUser?.email}</p>
+            </div>
+          </button>
           <button
             onClick={() => signOut()}
-            className="rounded p-1 text-gray-400 hover:text-gray-600"
+            className="rounded p-1 text-gray-400 hover:text-gray-600 shrink-0"
             title="Выйти"
           >
             <LogOut className="h-4 w-4" />
           </button>
         </div>
       </div>
+      <ProfileEditModal />
     </aside>
   )
 }
