@@ -1,9 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useUnit } from "effector-react"
-import { Loader2, X } from "lucide-react"
+import { Loader2, Trash2, Upload, X } from "lucide-react"
 import {
   $profileDialogOpen,
   $savePending,
@@ -19,6 +19,9 @@ export function ProfileEditModal() {
   const close = useUnit(profileEditClosed)
   const submit = useUnit(profileFormSubmitted)
   const [uploading, setUploading] = useState(false)
+  const [preview, setPreview] = useState<string | null>(null)
+  const [removeAvatar, setRemoveAvatar] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   const {
     register,
@@ -30,52 +33,113 @@ export function ProfileEditModal() {
   useEffect(() => {
     if (currentUser) {
       reset({ name: currentUser.name })
+      setPreview(null)
+      setRemoveAvatar(false)
+      if (fileRef.current) fileRef.current.value = ""
     }
   }, [currentUser, reset])
+
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close()
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [open, close])
 
   if (!open) return null
 
   const onSubmit = async (data: Record<string, unknown>) => {
-    const fileInput = document.getElementById("pp-avatar") as HTMLInputElement
-    const file = fileInput?.files?.[0]
-    let avatarUrl: string | null = null
+    const file = fileRef.current?.files?.[0]
+    let avatarUrl: string | null
 
     if (file) {
       setUploading(true)
-      const formData = new FormData()
-      formData.append("avatar", file)
       try {
+        const formData = new FormData()
+        formData.append("avatar", file)
         const res = await fetch("/api/upload/avatar", {
           method: "POST",
           body: formData,
         })
-        if (res.ok) {
-          const json = await res.json()
-          avatarUrl = json.url
-        }
+        avatarUrl = res.ok ? (await res.json()).url : null
       } catch {
-        // upload failed — save profile without new avatar
+        avatarUrl = null
       }
       setUploading(false)
+    } else {
+      avatarUrl = null
     }
 
-    submit({ name: data.name as string, avatarUrl: avatarUrl ?? currentUser?.avatar ?? null })
+    if (!avatarUrl && !removeAvatar) {
+      avatarUrl = currentUser?.avatar ?? null
+    }
+
+    submit({ name: data.name as string, avatarUrl })
   }
+
+  const displaySrc = preview ?? (removeAvatar ? null : currentUser?.avatar) ?? null
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-black/50" onClick={() => close()} />
       <div className="relative z-10 w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Редактировать профиль</h2>
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900">Редактировать профиль</h2>
           <button
             onClick={() => close()}
-            className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="flex flex-col items-center gap-4">
+            <div className="relative">
+              {displaySrc ? (
+                <div className="relative">
+                  <img
+                    src={displaySrc}
+                    alt=""
+                    className="h-24 w-24 rounded-full object-cover ring-4 ring-gray-100"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPreview(null)
+                      setRemoveAvatar(true)
+                      if (fileRef.current) fileRef.current.value = ""
+                    }}
+                    className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow hover:bg-red-600"
+                    title="Удалить аватар"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gray-100 ring-4 ring-gray-50">
+                  <Upload className="h-8 w-8 text-gray-400" />
+                </div>
+              )}
+            </div>
+            <label className="cursor-pointer rounded-md bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100 transition-colors">
+              {displaySrc ? "Изменить фото" : "Загрузить фото"}
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0]
+                  if (f) {
+                    setPreview(URL.createObjectURL(f))
+                    setRemoveAvatar(false)
+                  }
+                }}
+              />
+            </label>
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700" htmlFor="pp-name">
               Имя
@@ -89,32 +153,12 @@ export function ProfileEditModal() {
               <p className="mt-1 text-xs text-red-600">{errors.name.message as string}</p>
             )}
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700" htmlFor="pp-avatar">
-              Аватар
-            </label>
-            {currentUser?.avatar && (
-              <div className="mb-2">
-                <img
-                  src={currentUser.avatar}
-                  alt=""
-                  className="h-16 w-16 rounded-full object-cover"
-                />
-              </div>
-            )}
-            <input
-              id="pp-avatar"
-              type="file"
-              accept="image/*"
-              className="mt-1 block w-full text-sm text-gray-500 file:mr-3 file:rounded-md file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-blue-700 hover:file:bg-blue-100"
-            />
-          </div>
           <button
             type="submit"
             disabled={pending || uploading}
-            className="flex w-full items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
           >
-            {(pending || uploading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {(pending || uploading) && <Loader2 className="h-4 w-4 animate-spin" />}
             {uploading ? "Загрузка..." : pending ? "Сохранение..." : "Сохранить"}
           </button>
         </form>
