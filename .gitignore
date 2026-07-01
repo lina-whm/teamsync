@@ -9,5 +9,6 @@ prisma/dev.db-journal
 prisma/prisma/
 coverage/
 *.log
+public/uploads/
 .pid
 test_output.html

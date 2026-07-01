@@ -61,16 +61,21 @@ export const authConfig: NextAuthConfig = {
           email: user.email,
           name: user.name,
           role: user.role,
+          image: user.avatar,
         }
       },
     }),
   ],
   callbacks: {
-    jwt({ token, user }) {
+    jwt({ token, user, trigger, session }) {
       if (user) {
         const extended = token as ExtendedToken & typeof token
         extended.id = user.id
         extended.role = user.role
+        token.picture = user.image ?? null
+      }
+      if (trigger === "update" && session?.image) {
+        token.picture = session.image
       }
       return token
     },
@@ -82,6 +87,9 @@ export const authConfig: NextAuthConfig = {
       }
       if (extended.role) {
         userRecord.role = extended.role
+      }
+      if (token.picture) {
+        userRecord.image = token.picture
       }
       return session
     },

@@ -49,12 +49,12 @@ export function ProfileEditModal() {
           method: "POST",
           body: formData,
         })
-        if (!res.ok) throw new Error("Upload failed")
-        const json = await res.json()
-        avatarUrl = json.url
+        if (res.ok) {
+          const json = await res.json()
+          avatarUrl = json.url
+        }
       } catch {
-        setUploading(false)
-        return
+        // upload failed — save profile without new avatar
       }
       setUploading(false)
     }

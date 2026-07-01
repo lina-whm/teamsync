@@ -8,6 +8,29 @@ const UpdateUserSchema = z.object({
   avatar: z.string().nullable().optional(),
 })
 
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const session = await auth()
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  const { id } = await params
+
+  const user = await db.user.findUnique({
+    where: { id },
+    select: { id: true, email: true, name: true, avatar: true, role: true },
+  })
+
+  if (!user) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 })
+  }
+
+  return NextResponse.json(user)
+}
+
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> },

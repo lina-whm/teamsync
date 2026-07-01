@@ -1,6 +1,7 @@
 import { createEvent, createStore, sample } from "effector"
 import { createEffect } from "effector"
 import { apiClient } from "@/shared/api/base"
+import type { User } from "@/entities/user"
 import { $currentUser, loadSessionFx } from "@/entities/user"
 
 export const profileEditOpened = createEvent()
@@ -13,12 +14,14 @@ export const $profileDialogOpen = createStore(false)
 
 export const saveProfileFx = createEffect(
   async ({ id, name, avatar }: { id: string; name: string; avatar: string | null }) => {
-    return apiClient<unknown>(`/api/users/${id}`, {
+    return apiClient<User>(`/api/users/${id}`, {
       method: "PATCH",
       body: JSON.stringify({ name, avatar }),
     })
   },
 )
+
+$currentUser.on(saveProfileFx.doneData, (_, user) => user)
 
 export const $savePending = saveProfileFx.pending
 
