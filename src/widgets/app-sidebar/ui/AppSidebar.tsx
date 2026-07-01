@@ -83,9 +83,17 @@ export function AppSidebar() {
             onClick={() => openProfileEdit()}
             className="flex items-center gap-3 flex-1 min-w-0 rounded-md p-1 hover:bg-gray-50 transition-colors text-left"
           >
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700">
-              {initials}
-            </div>
+            {currentUser?.avatar ? (
+              <img
+                src={currentUser.avatar}
+                alt=""
+                className="h-8 w-8 shrink-0 rounded-full object-cover"
+              />
+            ) : (
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700">
+                {initials}
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <p className="truncate text-sm font-medium text-gray-900">
                 {currentUser?.name ?? "Пользователь"}

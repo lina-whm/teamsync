@@ -17,12 +17,10 @@ export const loadSessionFx = createEffect(async (): Promise<User | null> => {
 
   const { user } = session as { user: { id: string; email: string; name: string; role?: string; image?: string } }
 
-  let avatar = user.image ?? null
   try {
     const res = await fetch(`/api/users/${user.id}`)
     if (res.ok) {
-      const data = await res.json()
-      avatar = data.avatar ?? avatar
+      return await res.json()
     }
   } catch {}
 
@@ -31,7 +29,7 @@ export const loadSessionFx = createEffect(async (): Promise<User | null> => {
     email: user.email,
     name: user.name,
     role: (user.role ?? "MEMBER") as Role,
-    avatar,
+    avatar: user.image ?? null,
   }
 })
 

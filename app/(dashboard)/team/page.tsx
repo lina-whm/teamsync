@@ -25,17 +25,25 @@ export default function TeamPage() {
     <div className="space-y-4">
       <h1 className="text-xl font-bold text-gray-900">Команда</h1>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {(users ?? []).map((user: { id: string; name: string; email: string; role: string }) => (
+        {(users ?? []).map((user: { id: string; name: string; email: string; role: string; avatar?: string | null }) => (
           <div key={user.id} className="rounded-lg border bg-white p-4 shadow-sm">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700">
-                {user.name
-                  .split(" ")
-                  .map((n: string) => n[0])
-                  .join("")
-                  .toUpperCase()
-                  .slice(0, 2)}
-              </div>
+              {user.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt=""
+                  className="h-10 w-10 shrink-0 rounded-full object-cover"
+                />
+              ) : (
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700">
+                  {user.name
+                    .split(" ")
+                    .map((n: string) => n[0])
+                    .join("")
+                    .toUpperCase()
+                    .slice(0, 2)}
+                </div>
+              )}
               <div>
                 <p className="text-sm font-medium text-gray-900">{user.name}</p>
                 <p className="text-xs text-gray-500">{user.email}</p>
