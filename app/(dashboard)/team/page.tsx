@@ -1,13 +1,16 @@
 "use client"
 
 import { useUnit } from "effector-react"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { getUsersFx, getUsersQuery } from "@/entities/user"
+import type { User } from "@/entities/user"
+import { ProfileViewModal } from "@/features/profile-view"
 
 export default function TeamPage() {
   const users = useUnit(getUsersQuery.$data)
   const pending = useUnit(getUsersQuery.$pending)
   const loadUsers = useUnit(getUsersFx)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
   useEffect(() => {
     loadUsers()
@@ -21,12 +24,25 @@ export default function TeamPage() {
     )
   }
 
+  const initials = (name: string) =>
+    name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2)
+
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold text-gray-900">Команда</h1>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {(users ?? []).map((user: { id: string; name: string; email: string; role: string; avatar?: string | null }) => (
-          <div key={user.id} className="rounded-lg border bg-white p-4 shadow-sm">
+        {(users ?? []).map((user: User) => (
+          <button
+            key={user.id}
+            type="button"
+            onClick={() => setSelectedUser(user)}
+            className="rounded-lg border bg-white p-4 shadow-sm text-left hover:shadow-md transition-shadow"
+          >
             <div className="flex items-center gap-3">
               {user.avatar ? (
                 <img
@@ -36,12 +52,7 @@ export default function TeamPage() {
                 />
               ) : (
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700">
-                  {user.name
-                    .split(" ")
-                    .map((n: string) => n[0])
-                    .join("")
-                    .toUpperCase()
-                    .slice(0, 2)}
+                  {initials(user.name)}
                 </div>
               )}
               <div>
@@ -60,9 +71,16 @@ export default function TeamPage() {
                 {user.role === "ADMIN" ? "Администратор" : "Пользователь"}
               </span>
             </div>
-          </div>
+          </button>
         ))}
       </div>
+
+      {selectedUser && (
+        <ProfileViewModal
+          user={selectedUser}
+          onClose={() => setSelectedUser(null)}
+        />
+      )}
     </div>
   )
 }

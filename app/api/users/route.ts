@@ -9,7 +9,11 @@ export async function GET() {
   }
 
   const users = await db.user.findMany({
-    select: { id: true, email: true, name: true, avatar: true, role: true },
+    select: {
+      id: true, email: true, name: true, firstName: true, lastName: true,
+      avatar: true, position: true, department: true, city: true,
+      workEmail: true, workPhone: true, role: true,
+    },
     orderBy: { name: "asc" },
   })
 

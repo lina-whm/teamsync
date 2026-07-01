@@ -9,8 +9,11 @@ import { CreateTaskModal } from "@/features/create-task"
 import { EditTaskModal, taskEditOpened } from "@/features/edit-task"
 import { TaskDetailPanel } from "@/widgets/task-detail"
 import { TaskFilters } from "@/features/filter-tasks"
+import { ProfileViewModal } from "@/features/profile-view"
 import { KanbanColumn } from "./KanbanColumn"
 import { getTasksQuery, Task, TaskStatus, refetchTasks } from "@/entities/task"
+import { getUsersQuery, getUsersFx } from "@/entities/user"
+import type { User } from "@/entities/user"
 import { apiClient } from "@/shared/api/base"
 import { boardMounted } from "../model/board.model"
 
@@ -41,10 +44,15 @@ export function KanbanBoard() {
   const openCreate = useUnit(createTaskDialogOpened)
   const editTask = useUnit(taskEditOpened)
   const refetch = useUnit(refetchTasks)
+  const loadUsers = useUnit(getUsersFx)
 
   useEffect(() => {
     onBoardMounted()
+    loadUsers()
   }, [])
+
+  const users = useUnit(getUsersQuery.$data)
+  const [viewProfileUser, setViewProfileUser] = useState<User | null>(null)
 
   const tasks: Task[] = tasksData ?? []
 
@@ -76,6 +84,11 @@ export function KanbanBoard() {
 
   const handleCardEdit = (task: Task) => {
     editTask(task)
+  }
+
+  const handleViewProfile = (userId: string) => {
+    const user = (users ?? []).find((u: User) => u.id === userId)
+    if (user) setViewProfileUser(user)
   }
 
   const handleCardDelete = async (task: Task) => {
@@ -112,6 +125,7 @@ export function KanbanBoard() {
                 onTaskClick={handleTaskClick}
                 onTaskEdit={handleCardEdit}
                 onTaskDelete={handleCardDelete}
+                onViewProfile={handleViewProfile}
               />
             ))}
           </div>
@@ -125,6 +139,12 @@ export function KanbanBoard() {
         onClose={() => setDetailOpen(false)}
         onEdit={handleEditTask}
       />
+      {viewProfileUser && (
+        <ProfileViewModal
+          user={viewProfileUser}
+          onClose={() => setViewProfileUser(null)}
+        />
+      )}
     </div>
   )
 }

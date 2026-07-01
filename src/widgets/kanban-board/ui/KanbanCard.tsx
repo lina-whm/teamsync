@@ -30,9 +30,10 @@ interface KanbanCardProps {
   onClick: () => void
   onEdit: () => void
   onDelete: () => void
+  onViewProfile?: (userId: string) => void
 }
 
-export function KanbanCard({ task, onClick, onEdit, onDelete }: KanbanCardProps) {
+export function KanbanCard({ task, onClick, onEdit, onDelete, onViewProfile }: KanbanCardProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
   })
@@ -72,7 +73,17 @@ export function KanbanCard({ task, onClick, onEdit, onDelete }: KanbanCardProps)
           )}
         </div>
         {task.assignee && (
-          <p className="mt-1 text-xs text-gray-500">{task.assignee.name}</p>
+          <button
+            type="button"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation()
+              onViewProfile?.(task.assignee!.id)
+            }}
+            className="mt-1 text-xs text-gray-500 hover:text-blue-600"
+          >
+            {task.assignee.name}
+          </button>
         )}
       </div>
       <div className="absolute right-1 top-1 hidden gap-0.5 group-hover:flex">
