@@ -10,7 +10,8 @@ import { EditTaskModal, taskEditOpened } from "@/features/edit-task"
 import { TaskDetailPanel } from "@/widgets/task-detail"
 import { TaskFilters } from "@/features/filter-tasks"
 import { KanbanColumn } from "./KanbanColumn"
-import { getTasksQuery, Task, TaskStatus } from "@/entities/task"
+import { getTasksQuery, Task, TaskStatus, refetchTasks } from "@/entities/task"
+import { apiClient } from "@/shared/api/base"
 import { boardMounted } from "../model/board.model"
 
 const STATUSES: TaskStatus[] = ["BACKLOG", "IN_PROGRESS", "REVIEW", "DONE"]
@@ -39,6 +40,7 @@ export function KanbanBoard() {
   const [detailOpen, setDetailOpen] = useState(false)
   const openCreate = useUnit(createTaskDialogOpened)
   const editTask = useUnit(taskEditOpened)
+  const refetch = useUnit(refetchTasks)
 
   useEffect(() => {
     onBoardMounted()
@@ -72,6 +74,19 @@ export function KanbanBoard() {
     }
   }
 
+  const handleCardEdit = (task: Task) => {
+    editTask(task)
+  }
+
+  const handleCardDelete = async (task: Task) => {
+    try {
+      await apiClient(`/api/tasks/${task.id}`, { method: "DELETE" })
+      refetch()
+    } catch {
+      // ignore
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -95,6 +110,8 @@ export function KanbanBoard() {
                 status={status}
                 tasks={groupedTasks[status]}
                 onTaskClick={handleTaskClick}
+                onTaskEdit={handleCardEdit}
+                onTaskDelete={handleCardDelete}
               />
             ))}
           </div>

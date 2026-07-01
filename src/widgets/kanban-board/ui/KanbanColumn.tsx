@@ -22,9 +22,11 @@ interface KanbanColumnProps {
   status: TaskStatus
   tasks: Task[]
   onTaskClick: (task: Task) => void
+  onTaskEdit: (task: Task) => void
+  onTaskDelete: (task: Task) => void
 }
 
-export function KanbanColumn({ status, tasks, onTaskClick }: KanbanColumnProps) {
+export function KanbanColumn({ status, tasks, onTaskClick, onTaskEdit, onTaskDelete }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: STATUS_IDS[status],
   })
@@ -44,7 +46,7 @@ export function KanbanColumn({ status, tasks, onTaskClick }: KanbanColumnProps) 
       </div>
       <div className="flex flex-col gap-2">
         {tasks.map((task) => (
-          <KanbanCard key={task.id} task={task} onClick={() => onTaskClick(task)} />
+          <KanbanCard key={task.id} task={task} onClick={() => onTaskClick(task)} onEdit={() => onTaskEdit(task)} onDelete={() => onTaskDelete(task)} />
         ))}
       </div>
     </div>

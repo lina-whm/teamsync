@@ -1,6 +1,7 @@
 "use client"
 
 import { useDraggable } from "@dnd-kit/core"
+import { Pencil, Trash2 } from "lucide-react"
 import { Task, Priority, TaskStatus } from "@/entities/task"
 
 const PRIORITY_LABELS: Record<Priority, string> = {
@@ -27,9 +28,11 @@ const STATUS_COLORS: Record<TaskStatus, string> = {
 interface KanbanCardProps {
   task: Task
   onClick: () => void
+  onEdit: () => void
+  onDelete: () => void
 }
 
-export function KanbanCard({ task, onClick }: KanbanCardProps) {
+export function KanbanCard({ task, onClick, onEdit, onDelete }: KanbanCardProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
   })
@@ -47,7 +50,7 @@ export function KanbanCard({ task, onClick }: KanbanCardProps) {
       {...listeners}
       {...attributes}
       style={style}
-      className={`rounded-md border border-l-4 bg-white shadow-sm ${
+      className={`group relative rounded-md border border-l-4 bg-white shadow-sm ${
         STATUS_COLORS[task.status]
       } ${isDragging ? "opacity-50 shadow-lg" : ""}`}
     >
@@ -71,6 +74,22 @@ export function KanbanCard({ task, onClick }: KanbanCardProps) {
         {task.assignee && (
           <p className="mt-1 text-xs text-gray-500">{task.assignee.name}</p>
         )}
+      </div>
+      <div className="absolute right-1 top-1 hidden gap-0.5 group-hover:flex">
+        <button
+          onClick={(e) => { e.stopPropagation(); onEdit() }}
+          className="rounded p-1 text-gray-400 hover:bg-blue-100 hover:text-blue-600"
+          title="Редактировать"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+        <button
+          onClick={(e) => { e.stopPropagation(); onDelete() }}
+          className="rounded p-1 text-gray-400 hover:bg-red-100 hover:text-red-600"
+          title="Удалить"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
       </div>
     </div>
   )

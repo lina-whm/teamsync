@@ -39,6 +39,5 @@ sample({
 
 sample({
   clock: saveProfileFx.doneData,
-  fn: () => loadSessionFx(),
   target: loadSessionFx,
 })
