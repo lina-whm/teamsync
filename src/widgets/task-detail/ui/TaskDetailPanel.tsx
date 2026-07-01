@@ -1,11 +1,10 @@
 "use client"
 
 import { useUnit } from "effector-react"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query"
 import { X, Pencil, Trash2, Loader2 } from "lucide-react"
-import { Task, Priority, TaskStatus } from "@/entities/task"
+import { Task, Priority, TaskStatus, refetchTasks } from "@/entities/task"
 import { apiClient } from "@/shared/api/base"
-import { $currentUser } from "@/entities/user"
 
 const PRIORITY_LABELS: Record<Priority, string> = {
   LOW: "Низкий",
@@ -29,8 +28,7 @@ interface TaskDetailPanelProps {
 }
 
 export function TaskDetailPanel({ task, open, onClose, onEdit }: TaskDetailPanelProps) {
-  const queryClient = useQueryClient()
-  const currentUser = useUnit($currentUser)
+  const refetch = useUnit(refetchTasks)
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
@@ -38,15 +36,12 @@ export function TaskDetailPanel({ task, open, onClose, onEdit }: TaskDetailPanel
       await apiClient(`/api/tasks/${task.id}`, { method: "DELETE" })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] })
+      refetch()
       onClose()
     },
   })
 
   if (!open || !task) return null
-
-  const canEdit =
-    currentUser?.role === "ADMIN" || currentUser?.id === task.creatorId || currentUser?.id === task.assigneeId
 
   return (
     <div className="fixed inset-0 z-40 flex justify-end">
@@ -97,29 +92,27 @@ export function TaskDetailPanel({ task, open, onClose, onEdit }: TaskDetailPanel
             </p>
           </div>
         </div>
-        {canEdit && (
-          <div className="mt-6 flex gap-3 border-t pt-4">
-            <button
-              onClick={onEdit}
-              className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-            >
-              <Pencil className="h-4 w-4" />
-              Редактировать
-            </button>
-            <button
-              onClick={() => deleteMutation.mutate()}
-              disabled={deleteMutation.isPending}
-              className="flex items-center gap-2 rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {deleteMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Trash2 className="h-4 w-4" />
-              )}
-              Удалить
-            </button>
-          </div>
-        )}
+        <div className="mt-6 flex gap-3 border-t pt-4">
+          <button
+            onClick={onEdit}
+            className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            <Pencil className="h-4 w-4" />
+            Редактировать
+          </button>
+          <button
+            onClick={() => deleteMutation.mutate()}
+            disabled={deleteMutation.isPending}
+            className="flex items-center gap-2 rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {deleteMutation.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2 className="h-4 w-4" />
+            )}
+            Удалить
+          </button>
+        </div>
       </div>
     </div>
   )

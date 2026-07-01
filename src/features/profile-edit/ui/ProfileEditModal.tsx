@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useUnit } from "effector-react"
 import { Loader2, X } from "lucide-react"
@@ -18,6 +18,7 @@ export function ProfileEditModal() {
   const currentUser = useUnit($currentUser)
   const close = useUnit(profileEditClosed)
   const submit = useUnit(profileFormSubmitted)
+  const [uploading, setUploading] = useState(false)
 
   const {
     register,
@@ -28,14 +29,37 @@ export function ProfileEditModal() {
 
   useEffect(() => {
     if (currentUser) {
-      reset({ name: currentUser.name, avatar: currentUser.avatar ?? "" })
+      reset({ name: currentUser.name })
     }
   }, [currentUser, reset])
 
   if (!open) return null
 
-  const onSubmit = (data: Record<string, unknown>) => {
-    submit(data as { name: string; avatar: string })
+  const onSubmit = async (data: Record<string, unknown>) => {
+    const fileInput = document.getElementById("pp-avatar") as HTMLInputElement
+    const file = fileInput?.files?.[0]
+    let avatarUrl: string | null = null
+
+    if (file) {
+      setUploading(true)
+      const formData = new FormData()
+      formData.append("avatar", file)
+      try {
+        const res = await fetch("/api/upload/avatar", {
+          method: "POST",
+          body: formData,
+        })
+        if (!res.ok) throw new Error("Upload failed")
+        const json = await res.json()
+        avatarUrl = json.url
+      } catch {
+        setUploading(false)
+        return
+      }
+      setUploading(false)
+    }
+
+    submit({ name: data.name as string, avatarUrl: avatarUrl ?? currentUser?.avatar ?? null })
   }
 
   return (
@@ -67,21 +91,31 @@ export function ProfileEditModal() {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700" htmlFor="pp-avatar">
-              URL аватара
+              Аватар
             </label>
+            {currentUser?.avatar && (
+              <div className="mb-2">
+                <img
+                  src={currentUser.avatar}
+                  alt=""
+                  className="h-16 w-16 rounded-full object-cover"
+                />
+              </div>
+            )}
             <input
               id="pp-avatar"
-              {...register("avatar")}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              type="file"
+              accept="image/*"
+              className="mt-1 block w-full text-sm text-gray-500 file:mr-3 file:rounded-md file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-blue-700 hover:file:bg-blue-100"
             />
           </div>
           <button
             type="submit"
-            disabled={pending}
+            disabled={pending || uploading}
             className="flex w-full items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {pending ? "Сохранение..." : "Сохранить"}
+            {(pending || uploading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {uploading ? "Загрузка..." : pending ? "Сохранение..." : "Сохранить"}
           </button>
         </form>
       </div>
