@@ -1,5 +1,6 @@
 {
   "extends": "next/core-web-vitals",
+  "ignorePatterns": ["e2e/**/*", ".next/**/*"],
   "rules": {
     "no-restricted-imports": [
       "error",
@@ -11,6 +12,8 @@
           }
         ]
       }
-    ]
+    ],
+    "@next/next/no-img-element": "warn",
+    "react-hooks/exhaustive-deps": "warn"
   }
 }
