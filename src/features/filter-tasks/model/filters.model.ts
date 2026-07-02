@@ -1,39 +1,31 @@
-import { createEvent, createStore, sample } from "effector"
+import { createStore, sample } from "effector"
 import { debounce } from "patronum"
 import { TaskFilters, Priority, TaskStatus } from "@/entities/task"
-import { $activeSprint } from "@/entities/sprint"
+import { createFilterStore } from "@/shared/lib/factories"
 
-export const searchChanged = createEvent<string>()
-export const statusFilterChanged = createEvent<TaskStatus | "">()
-export const priorityFilterChanged = createEvent<Priority | "">()
-export const assigneeFilterChanged = createEvent<string>()
-export const filtersReset = createEvent()
+import type { EventCallable, Store as StoreType } from "effector"
 
-export const $search = createStore("")
-  .on(searchChanged, (_, v) => v)
-  .reset(filtersReset)
+const filterStores = createFilterStore([
+  { name: "search" },
+  { name: "statusFilter" },
+  { name: "priorityFilter" },
+  { name: "assigneeFilter" },
+])
 
-export const $statusFilter = createStore<TaskStatus | "">("")
-  .on(statusFilterChanged, (_, v) => v)
-  .reset(filtersReset)
+export const $search = filterStores.$search as StoreType<string>
+export const $statusFilter = filterStores.$statusFilter as StoreType<TaskStatus | "">
+export const $priorityFilter = filterStores.$priorityFilter as StoreType<Priority | "">
+export const $assigneeFilter = filterStores.$assigneeFilter as StoreType<string>
 
-export const $priorityFilter = createStore<Priority | "">("")
-  .on(priorityFilterChanged, (_, v) => v)
-  .reset(filtersReset)
+export const searchChanged = filterStores.searchChanged as EventCallable<string>
+export const statusFilterChanged = filterStores.statusFilterChanged as EventCallable<TaskStatus | "">
+export const priorityFilterChanged = filterStores.priorityFilterChanged as EventCallable<Priority | "">
+export const assigneeFilterChanged = filterStores.assigneeFilterChanged as EventCallable<string>
+export const filtersReset = filterStores.reset as EventCallable<void>
 
-export const $assigneeFilter = createStore<string>("")
-  .on(assigneeFilterChanged, (_, v) => v)
-  .reset(filtersReset)
-
-const $debouncedSearch = createStore("")
 const debounceSearchChanged = debounce({
   source: searchChanged,
   timeout: 300,
-})
-
-sample({
-  clock: debounceSearchChanged,
-  target: $debouncedSearch,
 })
 
 export const $filters = createStore<TaskFilters>({
@@ -44,15 +36,15 @@ export const $filters = createStore<TaskFilters>({
 }).reset(filtersReset)
 
 sample({
-  clock: [$debouncedSearch, $statusFilter, $priorityFilter, $assigneeFilter],
+  clock: [debounceSearchChanged, $statusFilter, $priorityFilter, $assigneeFilter],
   source: {
-    search: $debouncedSearch,
+    search: $search,
     status: $statusFilter,
     priority: $priorityFilter,
     assigneeId: $assigneeFilter,
   },
   fn: ({ search, status, priority, assigneeId }): TaskFilters => ({
-    search: search,
+    search,
     status: (status || "all") as TaskStatus | "all",
     priority: (priority || "all") as Priority | "all",
     assigneeId: assigneeId || null,

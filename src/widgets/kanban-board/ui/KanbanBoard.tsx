@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { DndContext, DragEndEvent } from "@dnd-kit/core"
 import { useUnit } from "effector-react"
+import { reflect } from "@/shared/lib/reflect"
 import { useDragDropTask } from "@/features/drag-drop-task"
 import { createTaskDialogOpened } from "@/features/create-task"
 import { CreateTaskModal } from "@/features/create-task"
@@ -18,6 +19,27 @@ import { apiClient } from "@/shared/api/base"
 import { boardMounted } from "../model/board.model"
 
 const STATUSES: TaskStatus[] = ["BACKLOG", "IN_PROGRESS", "REVIEW", "DONE"]
+
+const CreateTaskButton = reflect({
+  view: ({ onClick }: { onClick: () => void }) => (
+    <button
+      onClick={onClick}
+      className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+    >
+      + Новая задача
+    </button>
+  ),
+  bind: { onClick: createTaskDialogOpened },
+})
+
+const TaskCounter = reflect({
+  view: ({ count }: { count: number }) => (
+    <span className="text-sm text-gray-500">{count} задач</span>
+  ),
+  bind: {
+    count: getTasksQuery.$data.map((tasks) => (tasks ?? []).length),
+  },
+})
 
 function BoardSkeleton() {
   return (
@@ -41,7 +63,6 @@ export function KanbanBoard() {
   const { handleDragEnd } = useDragDropTask()
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [detailOpen, setDetailOpen] = useState(false)
-  const openCreate = useUnit(createTaskDialogOpened)
   const editTask = useUnit(taskEditOpened)
   const refetch = useUnit(refetchTasks)
   const loadUsers = useUnit(getUsersFx)
@@ -104,12 +125,10 @@ export function KanbanBoard() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-gray-900">Доска задач</h1>
-        <button
-          onClick={() => openCreate()}
-          className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          + Новая задача
-        </button>
+        <div className="flex items-center gap-3">
+          <TaskCounter />
+          <CreateTaskButton />
+        </div>
       </div>
       <TaskFilters />
       {tasksPending && !tasks.length ? (
